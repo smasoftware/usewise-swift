@@ -170,6 +170,7 @@ public final class Usewise {
     public func trackError(
         _ message: String,
         type: String = "exception",
+        screen: String? = nil,
         processId: String? = nil,
         stepName: String? = nil,
         code: String? = nil,
@@ -191,6 +192,7 @@ public final class Usewise {
             ],
         ]
         if let uid = userId { payload["user_id"] = uid }
+        if let scr = screen { payload["screen"] = scr }
         if let pid = processId { payload["process_id"] = pid }
         if let sn = stepName { payload["step_name"] = sn }
         if let c = code { payload["error_code"] = c }
