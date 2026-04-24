@@ -165,6 +165,53 @@ public final class Usewise {
         }
     }
 
+    // MARK: - Error Tracking
+
+    public func trackError(
+        _ message: String,
+        type: String = "exception",
+        processId: String? = nil,
+        stepName: String? = nil,
+        code: String? = nil,
+        severity: String = "medium",
+        stackTrace: String? = nil,
+        context: [String: Any]? = nil
+    ) async {
+        guard !optedOut else { return }
+
+        var payload: [String: Any] = [
+            "error_type": type,
+            "error_message": message,
+            "anonymous_id": anonymousId,
+            "severity": severity,
+            "device_context": [
+                "device_os": deviceContext.deviceOS,
+                "device_model": deviceContext.deviceModel,
+                "app_version": deviceContext.appVersion,
+            ],
+        ]
+        if let uid = userId { payload["user_id"] = uid }
+        if let pid = processId { payload["process_id"] = pid }
+        if let sn = stepName { payload["step_name"] = sn }
+        if let c = code { payload["error_code"] = c }
+        if let st = stackTrace { payload["stack_trace"] = st }
+        if let ctx = context { payload["context"] = ctx }
+
+        do {
+            let body = try JSONSerialization.data(withJSONObject: payload)
+            var request = URLRequest(url: URL(string: "\(config.baseUrl)/error")!)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.setValue(config.apiKey, forHTTPHeaderField: "X-API-Key")
+            request.httpBody = body
+            _ = try await URLSession.shared.data(for: request)
+        } catch {
+            if config.enableLogging {
+                print("[Usewise] trackError failed: \(error)")
+            }
+        }
+    }
+
     // MARK: - Flush / Reset / Privacy
 
     public func flush() async {
