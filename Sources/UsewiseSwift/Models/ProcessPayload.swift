@@ -17,6 +17,11 @@ struct ProcessCompletePayload: Encodable {
     let process_id: String
 }
 
+struct ProcessFailPayload: Encodable {
+    let process_id: String
+    let reason: String?
+}
+
 struct ProcessStartResponse: Decodable {
     let process_id: String
     let process_name: String

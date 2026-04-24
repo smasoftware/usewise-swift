@@ -153,6 +153,18 @@ public final class Usewise {
         }
     }
 
+    public func failProcess(_ processId: String, reason: String? = nil) async {
+        guard !optedOut else { return }
+
+        do {
+            _ = try await httpClient.post("/process/fail", body: ProcessFailPayload(process_id: processId, reason: reason))
+        } catch {
+            if config.enableLogging {
+                print("[Usewise] failProcess failed: \(error)")
+            }
+        }
+    }
+
     // MARK: - Flush / Reset / Privacy
 
     public func flush() async {
